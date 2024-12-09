@@ -5,12 +5,26 @@ import logging
 from unidecode import unidecode
 
 class PDFTableExtractor:
-    def __init__():
-        pass
+    def __init__(self, file_name, configs):
+        self.path = os.path.abspath(f"src/files/pdf/{configs["name"].lower()}/{file_name}.pdf")
+        self.csv_path = os.path.abspath(f"src/files/csv")
+        self.file_name = file_name
+        self.configs = configs
+
     def start():
         pass
-    def get_table_data():
-        pass
+    def get_table_data(self, t_area, t_columns):
+        tables = camelot.read_pdf(
+            self.path,
+            flavor=self.configs["flavor"],
+            table_areas = t_area,
+            columns = t_columns,
+            strip_text = self.configs["strip_text"],
+            pages = self.configs["page"],
+            password= self.configs["password"]
+        )
+        
+
     def save_csv():
         pass
     def add_infos():
