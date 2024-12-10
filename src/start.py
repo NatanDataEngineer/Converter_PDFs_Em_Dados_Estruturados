@@ -3,6 +3,10 @@ import camelot
 import pandas as pd
 import logging
 from unidecode import unidecode
+from src.configs.tools import RDSPostgreSQLManager;
+
+# Configuring basic logging settings for python's logging module
+logging.basicConfig(level=logging.INFO)
 
 class PDFTableExtractor:
 
@@ -15,6 +19,7 @@ class PDFTableExtractor:
     def start():
         pass
 
+    # Extraindo tabelas de um PDF com parâmetros muito específicos usando Camelot
     def get_table_data(self, t_area, t_columns, fix):
         tables = camelot.read_pdf(
             self.path, # path to the PDF file
@@ -26,7 +31,7 @@ class PDFTableExtractor:
             password= self.configs["password"] # PDF password if encrypted
         )
 
-        # Quebrar o PDF em três data frames e depois concatena-los com o pandas
+        # Break PDF into three data frames and then merge them with pandas
         table_content = [self.fix_header(page.df) if fix else page.df for page in tables]
         result = pd.concat(table_content, ignore_index=True) if len(table_content) > 1 else table_content[0]
         return result
@@ -49,6 +54,7 @@ class PDFTableExtractor:
     def add_infos():
         pass
 
+    # Cleaning up the hearder
     @staticmethod
     def fix_header(df):
         df.columns = df.iloc[0] # Uses the first row as column names
@@ -57,8 +63,20 @@ class PDFTableExtractor:
 
     def sanitize_column_names():
         pass
-    def send_to_db():
-        pass
+
+    # Saving data from a pandas DataFrame into a specific table in a database.
+    def send_to_db(df, table_name):
+        try:
+            # Connecting to the database using RDSPostgreSQLManager which provides an
+            # SQLAlchemy connection
+            conection = RDSPostgreSQLManager().alchemy
+            # Iserting the DataFrame's content into a table using pandas
+            df.to_sql(table_name, conection, if_exists="append", index=False)
+            # Success message if succeeded 
+            logging.info(f"Dados salvos no DB {table_name}")
+        except Exception as e:
+            logging.error(e)
+
 
 if __name__== "__main__":
     extractor = PDFTableExtractor().start()
