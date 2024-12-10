@@ -31,8 +31,21 @@ class PDFTableExtractor:
         result = pd.concat(table_content, ignore_index=True) if len(table_content) > 1 else table_content[0]
         return result
 
-    def save_csv():
-        pass
+    '''
+    Creates the target directory if it doesn't exist, generates a file path,
+    and exports the DataFrame as a CSV using semicolon as separator.
+    '''
+    def save_csv(self, df, file_name):
+        # Check if directory exists, if not create it
+        if not os.path.exists(self.csv_path):
+            os.makedirs(self.csv_path, exist_ok=True)
+
+        # Create full path for the CSV file
+        path = os.path.join(self.csv_path, f"{file_name}.csv")
+
+        # Save DataFrame to CSV
+        df.to_csv(path, sep=";", index=False)
+
     def add_infos():
         pass
 
