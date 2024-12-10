@@ -26,7 +26,10 @@ class PDFTableExtractor:
             password= self.configs["password"]
         )
 
-        
+        # Quebrar o PDF em três data frames e depois concatena-los com o pandas
+        table_content = [self.fix_header(page.df) if fix else page.df for page in tables]
+        result = pd.concat(table_content, ignore_index=True) if len(table_content) > 1 else table_content[0]
+        return result
 
     def save_csv():
         pass
