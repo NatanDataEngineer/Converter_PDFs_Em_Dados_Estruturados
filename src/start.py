@@ -17,13 +17,13 @@ class PDFTableExtractor:
 
     def get_table_data(self, t_area, t_columns, fix):
         tables = camelot.read_pdf(
-            self.path,
-            flavor=self.configs["flavor"],
-            table_areas = t_area,
-            columns = t_columns,
-            strip_text = self.configs["strip_text"],
-            page = self.configs["page"],
-            password= self.configs["password"]
+            self.path, # path to the PDF file
+            flavor=self.configs["flavor"], # parsing method for tables
+            table_areas = t_area, # specific area in the PDF to extract tables from
+            columns = t_columns, # specific columns positions
+            strip_text = self.configs["strip_text"], # removes extra withespace 
+            page = self.configs["page"], # specific page(s) to extract from
+            password= self.configs["password"] # PDF password if encrypted
         )
 
         # Quebrar o PDF em três data frames e depois concatena-los com o pandas
