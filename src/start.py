@@ -16,8 +16,30 @@ class PDFTableExtractor:
         self.file_name = file_name
         self.configs = configs
 
-    def start():
-        pass
+    # Automating the workflow of extracting, cleaning and saving data from PDFs into a dabase
+    def start(self):
+        logging.info(f"Start pdf - {self.file_name}")
+        header = self.get_table_data(self.configs["header_table_areas"], self.configs["header_columns"], self.configs["header_fix"])
+        main = self.get_table_data(self.configs["table_areas"], self.configs["columns"], self.configs["fix"])
+        small = self.get_table_data(self.configs["small_table_areas"], self.configs["small_columns"], self.configs["small_fix"])
+
+        main = self.add_infos(header, main)
+        small = self.add_infos(header, small)
+
+        main = self.sanitize_column_names(main)
+        if self.configs["small_sanitize"]:
+            small = self.sanitize_column_names(small)
+
+        logging.info(f"Saving csv - {self.file_name}")
+        self.save_csv(main, self.file_name)
+        self.save_csv(small, f"{self.file_name}_small")
+
+        logging.info(f"Sending to DB - {self.file_name}")
+        self.send_to_db(main, f"Fatura_{self.configs["name"]}".lower())
+        self.send_to_db(small, f"Fatura_{self.configs["name"]}_small".lower())
+
+        return{"main": main, "small": small}
+
 
     # Extraindo tabelas de um PDF com parâmetros muito específicos usando Camelot
     def get_table_data(self, t_area, t_columns, fix):
@@ -36,10 +58,8 @@ class PDFTableExtractor:
         result = pd.concat(table_content, ignore_index=True) if len(table_content) > 1 else table_content[0]
         return result
 
-    '''
-    Creates the target directory if it doesn't exist, generates a file path,
-    and exports the DataFrame as a CSV using semicolon as separator.
-    '''
+    # Creates the target directory if it doesn't exist, generates a file path,
+    # and exports the DataFrame as a CSV using semicolon as separator.
     def save_csv(self, df, file_name):
         # Check if directory exists, if not create it
         if not os.path.exists(self.csv_path):
@@ -67,7 +87,6 @@ class PDFTableExtractor:
         content["Data de Inserção"] = pd.Timestamp('today').normalize()
         return content
         
-
     # Cleaning up the hearder
     @staticmethod
     def fix_header(df):
@@ -83,10 +102,10 @@ class PDFTableExtractor:
         # Replacing " " with "_"
         df.columns = df.columns.str.replace(" ", "_")
 
-        # Replacing special caracters
+        # Replacing special characters
         df.columns = df.columns.str.replace(r"\W", "", regex=True)
 
-        # Transforming words into lowercase
+        # Passing text to lowercase
         df.columns = df.columns.str.lower()
 
         return df
