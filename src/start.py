@@ -51,8 +51,22 @@ class PDFTableExtractor:
         # Save DataFrame to CSV
         df.to_csv(path, sep=";", index=False)
 
-    def add_infos():
-        pass
+    # Combining info from header with some info from content
+    def add_infos(self, header, content):
+        # This grabs the first row of the header DataFrame as a series called infos
+        infos = header.iloc[0];
+
+        # It takes the values from the first row of header and repeats them to create a new DataFrame
+        df = pd.DataFrame([infos.value] * len(content), columns=header.columns)
+
+        # Merging the content DataFrame and the newly created DataFrame (df) side-by-side
+        # ensures that the indices of both DataFrames are reset so they align properly.
+        content = pd.concat([content.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
+
+        # Adding timestamp(current date) for every row
+        content["Data de Inserção"] = pd.Timestamp('today').normalize()
+        return content
+        
 
     # Cleaning up the hearder
     @staticmethod
