@@ -59,8 +59,8 @@ class PDFTableExtractor:
         # It takes the values from the first row of header and repeats them to create a new DataFrame
         df = pd.DataFrame([infos.value] * len(content), columns=header.columns)
 
-        # Merging the content DataFrame and the newly created DataFrame (df) side-by-side
-        # ensures that the indices of both DataFrames are reset so they align properly.
+        # Merging the content DataFrame and the newly created DataFrame side-by-side
+        # Ensures that the indices of both DataFrames are reset so they align properly.
         content = pd.concat([content.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
 
         # Adding timestamp(current date) for every row
@@ -75,8 +75,21 @@ class PDFTableExtractor:
         df = df.drop(0) # Removes the first row
         df = df.drop(df.columns[0], axis=1) # Removes the first column
 
-    def sanitize_column_names():
-        pass
+    # Formating the text in the DataFrame before saving into the Database
+    def sanitize_column_names(self, df ):
+        # Removing "ç" and "accents"
+        df.columns = df.columns.map(lambda x: unidecode(x))
+
+        # Replacing " " with "_"
+        df.columns = df.columns.str.replace(" ", "_")
+
+        # Replacing special caracters
+        df.columns = df.columns.str.replace(r"\W", "", regex=True)
+
+        # Transforming words into lowercase
+        df.columns = df.columns.str.lower()
+
+        return df
 
     # Saving data from a pandas DataFrame into a specific table in a database.
     def send_to_db(df, table_name):
